@@ -29,6 +29,6 @@ public class Bullet : MonoBehaviour
         {
             dmg.takeDamage(damage);
         }
-        Destroy(gameObject, 0.01f);
+        Destroy(gameObject);
     }
 }

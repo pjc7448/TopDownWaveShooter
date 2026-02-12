@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] int shootRate;
     [SerializeField] float shootCooldown = 0.2f;
     [SerializeField] GameObject bulletPrefab;
-    [SerializeField] Transform firePoint;
+    [SerializeField] Transform FirePoint;
 
     int HPOriginal;
     float shootTimer;
@@ -50,7 +50,7 @@ public class PlayerController : MonoBehaviour
         movement();
         shootTimer += Time.deltaTime;
 
-        if (Input.GetButton("Fire1") && shootTimer >= shootRate)
+        if (Input.GetButton("Fire1") && shootTimer >= shootCooldown)
         {
             shoot();
         }
@@ -120,11 +120,6 @@ public class PlayerController : MonoBehaviour
         Vector3 moveDir = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
         controller.Move(moveDir.normalized * speed * Time.deltaTime);
         Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * shootDist, Color.red);
-
-        if (Input.GetButton("Fire1") && shootTimer >= shootRate)
-        {
-            shoot();
-        }
     }
 
     void shoot()
@@ -136,9 +131,9 @@ public class PlayerController : MonoBehaviour
         if (plane.Raycast(ray, out float distance))
         {
             Vector3 target = ray.GetPoint(distance);
-            Vector3 direction = (target - firePoint.position).normalized;
+            Vector3 direction = (target - FirePoint.position).normalized;
 
-            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.LookRotation(direction));
+            GameObject bullet = Instantiate(bulletPrefab, FirePoint.position, Quaternion.LookRotation(direction));
 
             Bullet b = bullet.GetComponent<Bullet>();
             if (b != null)
