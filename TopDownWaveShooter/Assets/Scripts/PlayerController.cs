@@ -1,9 +1,5 @@
-using Mono.Cecil;
-using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 
 public class PlayerController : MonoBehaviour
