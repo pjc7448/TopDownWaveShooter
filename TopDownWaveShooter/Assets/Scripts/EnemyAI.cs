@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EnemyAI : MonoBehaviour
+public class EnemyAI : MonoBehaviour, IDamage
 {
     [Header("----Stats----")]
 
@@ -36,7 +36,7 @@ public class EnemyAI : MonoBehaviour
         transform.position += direction * speed * Time.deltaTime;
         transform.LookAt(player);
     }
-    void TakeDamage(int amount)
+    public void takeDamage(int amount)
     {
         health -= amount;
         if (health <= 0)

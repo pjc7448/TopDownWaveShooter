@@ -24,7 +24,7 @@ public class Bullet : MonoBehaviour
     {
         if (other.CompareTag("Player")) return;
 
-        IDamage dmg = other.GetComponent<IDamage>();
+        IDamage dmg = other.GetComponentInParent<IDamage>();
         if (dmg != null)
         {
             dmg.takeDamage(damage);
