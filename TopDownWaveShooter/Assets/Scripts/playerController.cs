@@ -29,6 +29,10 @@ public class playerscript : MonoBehaviour, IDamage
 
     int baseShootDamage;
 
+    int regenAmount = 0;
+    float regenRate = 1f;
+    bool isRegen = false;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -194,4 +198,32 @@ public class playerscript : MonoBehaviour, IDamage
 
         updatePlayerUI();
     }
+
+    public void addRegen(int amount, float rate)
+    {
+        regenAmount += amount;
+        regenRate += rate;
+
+        if(!isRegen)
+        {
+            StartCoroutine(RegenRoutine());
+        }
+    }
+
+    IEnumerator RegenRoutine()
+    {
+        isRegen = true;
+
+        while (true)
+        {
+            yield return new WaitForSeconds(regenRate);
+
+            if (HP < maxHP)
+            {
+                Heal(regenAmount);
+            }
+        }
+    }
+
+
 }
