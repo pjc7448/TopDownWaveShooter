@@ -27,6 +27,8 @@ public class playerscript : MonoBehaviour, IDamage
     int maxHP;
     int shieldHP;
 
+    int baseShootDamage;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -34,7 +36,8 @@ public class playerscript : MonoBehaviour, IDamage
       maxHP = HP;
       shieldHP = 0;
 
-      baseSpeed = speed;
+        baseSpeed = speed;
+        baseShootDamage = shootDamage;
 
       updatePlayerUI();
     }
@@ -92,7 +95,7 @@ public class playerscript : MonoBehaviour, IDamage
           IDamage dmg = hit.collider.GetComponent<IDamage>();
           if(dmg != null)
             {
-              dmg.takeDamage(shootDamage);
+              dmg.takeDamage(baseShootDamage);
             }
         }
     }
@@ -133,7 +136,7 @@ public class playerscript : MonoBehaviour, IDamage
     }
     public void updatePlayerUI()
     {
-        if (maxHP > 0) return;
+        if (maxHP <= 0) return;
 
         float hpPercent = (float)HP / maxHP;
         hpPercent = Mathf.Clamp01(hpPercent);
@@ -176,6 +179,19 @@ public class playerscript : MonoBehaviour, IDamage
     public void AddShield(int amount)
     {
         shieldHP += amount;
+        updatePlayerUI();
+    }
+
+    public void addDamage(int amount)
+    {
+        baseShootDamage += amount;
+    }
+
+    public void addMaxHealth(int amount)
+    {
+        maxHP += amount;
+        HP += amount;
+
         updatePlayerUI();
     }
 }
