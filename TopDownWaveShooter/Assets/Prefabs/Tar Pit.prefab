@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 50957946844991507}
   - component: {fileID: 4905458168092554501}
   - component: {fileID: 1865554684248338046}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Tar Pit
   m_TagString: Untagged
   m_Icon: {fileID: 0}

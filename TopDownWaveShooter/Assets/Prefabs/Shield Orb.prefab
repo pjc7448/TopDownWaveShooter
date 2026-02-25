@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7479592544532403229}
   - component: {fileID: 1138755913013151701}
   - component: {fileID: 3460394772900058071}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Shield Orb
   m_TagString: Untagged
   m_Icon: {fileID: 0}
