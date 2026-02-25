@@ -186,4 +186,12 @@ public class playerscript : MonoBehaviour, IDamage
     {
         baseShootDamage += amount;
     }
+
+    public void addMaxHealth(int amount)
+    {
+        maxHP += amount;
+        HP += amount;
+
+        updatePlayerUI();
+    }
 }
