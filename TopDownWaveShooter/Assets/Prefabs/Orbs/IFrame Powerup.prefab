@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &624234907704646318
+--- !u!1 &115641985461086970
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,63 +8,63 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2394047044059966430}
-  - component: {fileID: 8177081254630725560}
-  - component: {fileID: 5980600085157025741}
-  - component: {fileID: 7244332457655314946}
-  - component: {fileID: 6761960629507617237}
+  - component: {fileID: 8993577147963548481}
+  - component: {fileID: 5405441010010462421}
+  - component: {fileID: 1772492645490125522}
+  - component: {fileID: 5901674675376494848}
+  - component: {fileID: 2067640877768994258}
   m_Layer: 0
-  m_Name: Regen Powerup
+  m_Name: IFrame Powerup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2394047044059966430
+--- !u!4 &8993577147963548481
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 624234907704646318}
+  m_GameObject: {fileID: 115641985461086970}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.75, z: -6.25}
+  m_LocalPosition: {x: -0.25, y: 0.75, z: -6.75}
   m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8177081254630725560
+--- !u!114 &5405441010010462421
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 624234907704646318}
+  m_GameObject: {fileID: 115641985461086970}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 670bc2f2c90aad74d8d0fad81941a867, type: 3}
+  m_Script: {fileID: 11500000, guid: 4219f859eeb13a14286cad7d94ad1aa4, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::regenPowerup
-  regenAmount: 2
-  regenRate: 1
+  m_EditorClassIdentifier: Assembly-CSharp::IFramePowerup
+  duration: 1
+  rateReduction: 1
   rotateSpeed: 100
---- !u!33 &5980600085157025741
+--- !u!33 &1772492645490125522
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 624234907704646318}
+  m_GameObject: {fileID: 115641985461086970}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &7244332457655314946
+--- !u!23 &5901674675376494848
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 624234907704646318}
+  m_GameObject: {fileID: 115641985461086970}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -83,7 +83,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f67dac5a3575cec4e8b2865ea80d6bb2, type: 2}
+  - {fileID: 2100000, guid: 63fb58dfac23874459355c89a107163d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -107,13 +107,13 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &6761960629507617237
+--- !u!135 &2067640877768994258
 SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 624234907704646318}
+  m_GameObject: {fileID: 115641985461086970}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2

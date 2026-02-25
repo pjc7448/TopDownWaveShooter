@@ -33,6 +33,11 @@ public class playerscript : MonoBehaviour, IDamage
     float regenRate = 1f;
     bool isRegen = false;
 
+    int iFrameDuration = 1;
+    float iFrameRate = 5f;
+    bool isInvincible = false;
+    bool hasIFrame = false;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -105,6 +110,11 @@ public class playerscript : MonoBehaviour, IDamage
     }
     public void takeDamage(int amount)
     {
+        if (isInvincible)
+        {
+            return;
+        }
+
         int remainingDamage = amount;
         if (remainingDamage > 0)
         {
@@ -225,5 +235,26 @@ public class playerscript : MonoBehaviour, IDamage
         }
     }
 
+    public void  addIFrame(int duration, float rate)
+    {
+        iFrameDuration += duration;
+        iFrameRate -= rate;
+        if (!hasIFrame)
+        {
+            StartCoroutine(IFrameRoutine());
+        }
+    }
 
+    IEnumerator IFrameRoutine()
+    {
+        hasIFrame = true;
+
+        while (true)
+        {
+            yield return new WaitForSeconds (iFrameRate);
+            isInvincible = true;
+            yield return new WaitForSeconds(iFrameDuration);
+            isInvincible = false;
+        }
+    }
 }
