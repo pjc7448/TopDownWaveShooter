@@ -1,22 +1,23 @@
 using UnityEngine;
 using System.Collections;
+using System;
 
 public class playerscript : MonoBehaviour, IDamage
 {
     [SerializeField] CharacterController controller;
     [SerializeField] LayerMask ignorelayer;
+    [SerializeField] Transform firepoint;
 
     [SerializeField] int HP;
+    [SerializeField] int maxShield = 20;
     [SerializeField] int speed;
-    [SerializeField] int jumpSpeed;
     [SerializeField] int sprintMod;
-    [SerializeField] int gravity;
-    [SerializeField] int jumpMax;
+
+    [SerializeField] float turnSpeed = 10f;
     [SerializeField] int shootDamage;
     [SerializeField] int shootDist;
     [SerializeField] int shootRate;
 
-    int jumpCount;
     int HPOrig;
     float shootTimer;
     Vector3 moveDir;
@@ -54,57 +55,89 @@ public class playerscript : MonoBehaviour, IDamage
     // Update is called once per frame
     void Update()
     {
-      movement();
-      sprint();
+        movement();
+        rotateMouse();
+        sprint();
+        
+        shootTimer += Time.deltaTime;
+        if (Input.GetButton("Fire1") && shootTimer >= shootRate)
+            shoot();
     }
     void movement()
     {
-      shootTimer += Time.deltaTime;
-      Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * shootDist, Color.red);
-      if(controller.isGrounded)
+        Vector3 input = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+
+        if (input.sqrMagnitude > 0.01f)
         {
-          jumpCount = 0;
-          playerVel = Vector3.zero;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Plane groundPlane = new Plane(Vector3.up, transform.position);
+            if (groundPlane.Raycast(ray, out float distance))
+            {
+                Vector3 mousePos = ray.GetPoint(distance);
+                Vector3 forward = (mousePos - transform.position).normalized;
+                forward.y = 0;
+
+                Vector3 right = Vector3.Cross(Vector3.up, forward);
+
+                Vector3 move = forward * input.z + right * input.x;
+                moveDir = move.normalized;
+
+                controller.Move(moveDir * baseSpeed * slowMultiplier * Time.deltaTime);
+            }
         }
-        //moveDir = new Vector3(Input.GetAxis("Horizontal") 0, Input.GetAxis("Vertical"));
-        moveDir = Input.GetAxis("Horizontal") * transform.right + Input.GetAxis("Vertical") * transform.forward;
-        controller.Move(moveDir * baseSpeed * slowMultiplier * Time.deltaTime);
-        jump();
-        controller.Move(playerVel * Time.deltaTime);
-        playerVel.y -= gravity * Time.deltaTime;
-        if (Input.GetButton("Fire1") && shootTimer >= shootRate)
-        shoot();
     }
-    void jump()
+    void rotateMouse()
     {
-      if(Input.GetButtonDown("Jump") && jumpCount < jumpMax)
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        Plane groundPlane = new Plane(Vector3.up, transform.position);
+
+        float distance;
+
+        if (groundPlane.Raycast(ray, out distance))
         {
-          playerVel.y = jumpSpeed;
-          jumpCount++;
+            Vector3 point = ray.GetPoint(distance);
+
+            Vector3 lookDir = point - transform.position;
+            lookDir.y = 0;
+
+            if (lookDir.sqrMagnitude < 0.01f)
+                return;
+
+            Quaternion targetRotation = Quaternion.LookRotation(lookDir);
+
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                turnSpeed * Time.deltaTime);
         }
     }
     void sprint()
     {
-      if(Input.GetButtonDown("Sprint"))
+      if (Input.GetButtonDown("Sprint"))
         {
-          baseSpeed *= sprintMod;
+          baseSpeed = speed * sprintMod;
         }
-      else if(Input.GetButtonUp("Sprint"))
+      else
         {
-          baseSpeed /= sprintMod;
+          baseSpeed = speed;
         }
     }
     void shoot()
     {
         shootTimer = 0;
         RaycastHit hit;
-        if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, shootDist, ~ignorelayer))
+        Vector3 origin = firepoint ? firepoint.position : transform.position;
+        Vector3 direction = transform.forward;
+
+        Debug.DrawRay(origin, direction * shootDist, Color.red, 1f);
+
+        if (Physics.Raycast(origin, direction, out hit, shootDist, ~ignorelayer))
         {
-          Debug.Log(hit.collider.name);
-          IDamage dmg = hit.collider.GetComponent<IDamage>();
-          if(dmg != null)
+            IDamage dmg = hit.collider.GetComponent<IDamage>();
+            if (dmg != null)
             {
-              dmg.takeDamage(baseShootDamage);
+                dmg.takeDamage(baseShootDamage);
             }
         }
     }
@@ -167,7 +200,7 @@ public class playerscript : MonoBehaviour, IDamage
         }
         else
         {
-            gamemanager.instance.playerShield.fillAmount = 0f;
+            gamemanager.instance.playerShield.fillAmount = 0;
             gamemanager.instance.playerShield.gameObject.SetActive(false);
         }
     }
@@ -193,6 +226,7 @@ public class playerscript : MonoBehaviour, IDamage
     public void AddShield(int amount)
     {
         shieldHP += amount;
+        shieldHP = Math.Clamp(shieldHP, 0, maxShield);
         updatePlayerUI();
     }
 

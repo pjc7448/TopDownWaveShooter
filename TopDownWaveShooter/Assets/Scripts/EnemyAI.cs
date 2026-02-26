@@ -6,63 +6,70 @@ using Unity.VisualScripting;
 public class EnemyAI : MonoBehaviour, IDamage
 {
     [SerializeField] Renderer model;
-    [SerializeField] NavMeshAgent Agent;
+    [SerializeField] NavMeshAgent agent;
 
     [SerializeField] int HP;
+    [SerializeField] int meleeDamage = 10;
+    [SerializeField] float meleeRate = 1f;
     [SerializeField] int FaceTargetSpeed;
     [SerializeField] int FOV;
+
     [SerializeField] int RoamDist;
     [SerializeField] int RoamPauseTime;
 
-    [SerializeField] GameObject bullet;
-    [SerializeField] float ShootRate;
-
-    [SerializeField] int GunRotateSpeed;
-    [SerializeField] Transform ShootPos;
-    [SerializeField] Transform GunPivot;
-
     Color colorOrg;
+    Vector3 startingPos;
+    float roamTimer;
 
-    float ShootTimer;
-    float RoamTimer;
-    float AngleToPlayer;
-    float StoppingDistOrig;
+    bool canDamage = true;
 
     bool PlayerInTrigger;
 
     Vector3 PlayerDir;
-    Vector3 StartingPos;
+    
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         colorOrg = model.material.color;
+        startingPos = transform.position;
+
+        agent.stoppingDistance = 1f;
+
         gamemanager.instance.updateGameGoal(1);
-        StoppingDistOrig = Agent.stoppingDistance;
-        StartingPos = transform.position;
     }
 
     // Update is called once per frame
     void Update()
     {
-        ShootTimer += Time.deltaTime;
-
-        if (Agent.remainingDistance < 0.01f)
-            RoamTimer += Time.deltaTime;
-
-        if (PlayerInTrigger && !CanSeePlayer())
+        if (gamemanager.instance.player != null)
         {
-            CheckRoam();
+            Vector3 playerPos = gamemanager.instance.player.transform.position;
+
+            agent.SetDestination(playerPos);
+
+            FacePlayer(playerPos);
         }
-        else if (!PlayerInTrigger)
+        else
         {
-            CheckRoam();
+            Roam();
+        }
+    }
+
+    void FacePlayer(Vector3 targetPos)
+    {
+        Vector3 dir = (targetPos - transform.position);
+        dir.y = 0;
+        if (dir.sqrMagnitude > 0.01f)
+        {
+            Quaternion rot = Quaternion.LookRotation(dir);
+            transform.rotation = Quaternion.Lerp(transform.rotation, rot, Time.deltaTime * FaceTargetSpeed);
         }
     }
 
     void CheckRoam()
     {
-        if (Agent.remainingDistance < 0.01f && RoamTimer >= RoamPauseTime)
+        if (agent.remainingDistance < 0.01f && roamTimer >= RoamPauseTime)
         {
             Roam();
         }
@@ -70,82 +77,49 @@ public class EnemyAI : MonoBehaviour, IDamage
 
     void Roam()
     {
-        RoamTimer = 0;
-        Agent.stoppingDistance = 0;
 
-        Vector3 RanPos = Random.insideUnitSphere * RoamDist;
-        RanPos += StartingPos;
-
-        NavMeshHit hit;
-        NavMesh.SamplePosition(RanPos, out hit, RoamDist, 1);
-        Agent.SetDestination(hit.position);
-    }
-
-    bool CanSeePlayer()
-    {
-        PlayerDir = gamemanager.instance.player.transform.position - transform.position;
-        AngleToPlayer = Vector3.Angle(PlayerDir, transform.forward);
-
-        Debug.DrawRay(transform.position, PlayerDir);
-
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, PlayerDir, out hit))
+        if (agent.remainingDistance < 0.1f)
         {
-            if (AngleToPlayer <= FOV && hit.collider.CompareTag("Player"))
+            roamTimer += Time.deltaTime;
+            if (roamTimer >= RoamPauseTime)
             {
-                Agent.SetDestination(gamemanager.instance.player.transform.position);
+                Vector3 randomPos = startingPos + Random.insideUnitSphere * RoamDist;
+                randomPos.y = transform.position.y;
 
-                if (Agent.remainingDistance < Agent.stoppingDistance)
-                    FaceTarget();
-
-                if (ShootTimer >= ShootRate)
+                NavMeshHit hit;
+                if (NavMesh.SamplePosition(randomPos, out hit, RoamDist, NavMesh.AllAreas))
                 {
-                    Shoot();
+                    agent.SetDestination(hit.position);
                 }
 
-                GunRotate();
-
-                Agent.stoppingDistance = StoppingDistOrig;
-                return true;
+                roamTimer = 0f;
             }
         }
-        Agent.stoppingDistance = 0;
-        return false;
     }
 
-    void FaceTarget()
+    private void OnTriggerStay(Collider other)
     {
-        Quaternion rot = Quaternion.LookRotation(PlayerDir);
-        transform.rotation = Quaternion.Lerp(transform.rotation, rot, Time.deltaTime * FaceTargetSpeed);
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && canDamage)
         {
-            PlayerInTrigger = true;
+            IDamage dmg = other.GetComponent<IDamage>();
+            if (dmg != null)
+            {
+                StartCoroutine(DealMeleeDamage(dmg));
+            }
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    IEnumerator DealMeleeDamage(IDamage dmg)
     {
-        if (other.CompareTag("Player"))
-        {
-            PlayerInTrigger = false;
-            Agent.stoppingDistance = 0;
-        }
-    }
-
-    void Shoot()
-    {
-        ShootTimer = 0;
-        Instantiate(bullet, ShootPos.position, GunPivot.rotation);
+        canDamage = false;
+        dmg.takeDamage(meleeDamage);
+        yield return new WaitForSeconds(meleeRate);
+        canDamage = true;
     }
 
     public void takeDamage(int amount)
     {
         HP -= amount;
-        Agent.SetDestination(gamemanager.instance.player.transform.position);
 
         if (HP <= 0)
         {
@@ -154,20 +128,14 @@ public class EnemyAI : MonoBehaviour, IDamage
         }
         else
         {
-            StartCoroutine(flashRed());
+            StartCoroutine(FlashRed());
         }
     }
-    IEnumerator flashRed()
+
+    IEnumerator FlashRed()
     {
         model.material.color = Color.red;
         yield return new WaitForSeconds(0.1f);
         model.material.color = colorOrg;
     }
-
-    void GunRotate()
-    {
-        Quaternion rot = Quaternion.LookRotation(PlayerDir);
-        GunPivot.rotation = Quaternion.LerpUnclamped(GunPivot.rotation, rot, Time.deltaTime * GunRotateSpeed);
-    }
-
 }
